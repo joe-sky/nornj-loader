@@ -19,7 +19,7 @@
   },
   "author": "Joe_Sky <hitomi_doax@sina.com>",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "nornj": "0.4.0-beta.22",
     "loader-utils": "^0.2.16"
   }
