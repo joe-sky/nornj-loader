@@ -16,7 +16,7 @@ module.exports = function (source) {
   var options = loaderUtils.parseQuery(this.query);
   this.cacheable && this.cacheable();
 
-  var tmpls = includeParser(source, this.context, true),
+  var tmpls = includeParser(source, this.resourcePath, true),
     tmplNames = Object.keys(tmpls),
     output = '';
 
@@ -36,5 +36,5 @@ module.exports = function (source) {
     output += '{\n' + tmplsStr + '};';
   }
 
-  return '\nmodule.exports = ' + output;
+  return '\'use strict\';\n\nmodule.exports = ' + output;
 };
