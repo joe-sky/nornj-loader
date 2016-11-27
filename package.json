@@ -1,0 +1,26 @@
+{
+  "name": "nornj-loader",
+  "version": "0.1.0-alpha.1",
+  "description": "",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "LICENSE"
+  ],
+  "keywords": [
+    "nornj",
+    "nj",
+    "template",
+    "react"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joe-sky/nornj-loader.git"
+  },
+  "author": "Joe_Sky <hitomi_doax@sina.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "nornj": "0.4.0-beta.22",
+    "loader-utils": "^0.2.16"
+  }
+}
