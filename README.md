@@ -1,5 +1,5 @@
 # NornJ-loader
-The template engine NornJ's Webpack loader
+The Webpack loader for template engine NornJ
 
 ### Installation
 
