@@ -16,6 +16,39 @@ module.exports = function (source) {
   var options = loaderUtils.parseQuery(this.query);
   this.cacheable && this.cacheable();
 
+  //Set delimiter rule of templates
+  nj.setTmplRule({
+    start: options.startRule,
+    end: options.endRule,
+    expr: options.exprRule,
+    external: options.externalRule,
+    prop: options.propRule,
+    template: options.templateRule
+  });
+
+  //Set configs for expressions and filters
+  if(options.exprConfig) {
+    var exprConfig = {};
+    nj.each(options.exprConfig, function(v, k) {
+      exprConfig[k] = {
+        options: v
+      };
+    });
+
+    nj.registerExpr(exprConfig);
+  }
+  if(options.filterConfig) {
+    var filterConfig = {};
+    nj.each(options.filterConfig, function(v, k) {
+      filterConfig[k] = {
+        options: v
+      };
+    });
+
+    nj.registerFilter(filterConfig);
+  }
+
+  //Parse the "include" and "template" block
   var tmpls = includeParser(source, this.resourcePath, true),
     tmplNames = Object.keys(tmpls),
     output = '';
@@ -26,7 +59,7 @@ module.exports = function (source) {
       output += buildTmplFns(nj.precompile(tmpls.main, options.outputComponent)) + ';';
     }
   }
-  else {  //Export multiple templates
+  else {  //Output multiple templates
     var tmplsStr = '';
     nj.each(tmpls, function (tmpl, name, i, l) {
       if (tmpl.trim().length > 0) {
