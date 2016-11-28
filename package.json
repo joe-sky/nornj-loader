@@ -1,7 +1,7 @@
 {
   "name": "nornj-loader",
   "version": "0.1.0-alpha.2",
-  "description": "",
+  "description": "The Webpack loader for template engine NornJ",
   "main": "index.js",
   "files": [
     "index.js",
