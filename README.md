@@ -1,9 +1,9 @@
-# NornJ-loader
+ï»¿# NornJ-loader
 Webpack loader for template engine NornJ
 
-### °²×°
+### å®‰è£…
 
-Ê¹ÓÃnpm°²×°:
+ä½¿ç”¨npmå®‰è£…:
 
 ```sh
 npm install nornj-loader
