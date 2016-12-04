@@ -98,6 +98,6 @@ module.exports = function (source) {
   }
 
   return '\'use strict\';\n\n'
-    + (resourceOptions.compiled ? 'var nj = require(\'nornj\');\n\n' : '')
+    + ((resourceOptions.raw || resourceOptions.compiled) ? 'var nj = require(\'nornj\');\n\n' : '')
     + `module.exports = ${output}`;
 };
