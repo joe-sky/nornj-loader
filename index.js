@@ -1,10 +1,12 @@
-var nj = require('nornj'),
-  includeParser = require('nornj/tools/includeParser'),
+'use strict';
+
+const nj = require('nornj'),
+  includeParser = require('nornj/src/parser/includeParser'),
   loaderUtils = require('loader-utils');
 
 function buildTmplFns(fns) {
-  var ret = '{\n';
-  nj.each(fns, function (v, k, i, l) {
+  let ret = '{\n';
+  nj.each(fns, (v, k, i, l) => {
     if (k.indexOf('_') != 0) {
       ret += '  ' + k + ': ' + v.toString() + (i < l - 1 ? ',' : '') + '\n';
     }
@@ -12,12 +14,12 @@ function buildTmplFns(fns) {
   return ret + '}';
 }
 
-function getCompileFnName(outputComponent) {
-  return outputComponent ? 'compileComponent' : 'compile';
+function getCompileFnName(outputH) {
+  return outputH ? 'compileH' : 'compile';
 }
 
 module.exports = function (source) {
-  var options = loaderUtils.parseQuery(this.query),
+  const options = loaderUtils.parseQuery(this.query),
     resourceOptions = loaderUtils.parseQuery(this.resourceQuery);
 
   this.cacheable && this.cacheable();
@@ -34,8 +36,8 @@ module.exports = function (source) {
 
   //Set configs for expressions and filters
   if (options.exprConfig) {
-    var exprConfig = {};
-    nj.each(options.exprConfig, function (v, k) {
+    let exprConfig = {};
+    nj.each(options.exprConfig, (v, k) => {
       exprConfig[k] = {
         options: v
       };
@@ -44,8 +46,8 @@ module.exports = function (source) {
     nj.registerExpr(exprConfig);
   }
   if (options.filterConfig) {
-    var filterConfig = {};
-    nj.each(options.filterConfig, function (v, k) {
+    let filterConfig = {};
+    nj.each(options.filterConfig, (v, k) => {
       filterConfig[k] = {
         options: v
       };
@@ -55,7 +57,7 @@ module.exports = function (source) {
   }
 
   //Parse the "include" and "template" block
-  var tmpls = includeParser(source, this.resourcePath, true),
+  let tmpls = includeParser(source, this.resourcePath, true),
     tmplNames = Object.keys(tmpls),
     output = '';
 
@@ -63,39 +65,39 @@ module.exports = function (source) {
   if (tmplNames.length == 1 && tmplNames[0] === 'main') {
     if (tmpls.main.trim().length > 0) {
       if (resourceOptions.raw) {
-        output += JSON.stringify(tmpls.main);
+        output += `nj(${JSON.stringify(tmpls.main)});`;
       }
       else if (resourceOptions.compiled) {
-        output += 'nj.' + getCompileFnName(options.outputComponent) + '(' + buildTmplFns(nj.precompile(tmpls.main, options.outputComponent)) + ');';
+        output += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpls.main, options.outputH)) + ');';
       }
       else {
-        output += buildTmplFns(nj.precompile(tmpls.main, options.outputComponent)) + ';';
+        output += buildTmplFns(nj.precompile(tmpls.main, options.outputH)) + ';';
       }
     }
   }
   else {  //Output multiple templates
     var tmplsStr = '';
-    nj.each(tmpls, function (tmpl, name, i, l) {
+    nj.each(tmpls, (tmpl, name, i, l) => {
       if (tmpl.trim().length > 0) {
         tmplsStr += '  ' + name + ': ';
 
         if (resourceOptions.raw) {
-          tmplsStr += JSON.stringify(tmpl);
+          tmplsStr += `nj(${JSON.stringify(tmpl)})`;
         }
         else if (resourceOptions.compiled) {
-          tmplsStr += 'nj.' + getCompileFnName(options.outputComponent) + '(' + buildTmplFns(nj.precompile(tmpl, options.outputComponent)) + ')';
+          tmplsStr += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpl, options.outputH)) + ')';
         }
         else {
-          tmplsStr += buildTmplFns(nj.precompile(tmpl, options.outputComponent));
+          tmplsStr += buildTmplFns(nj.precompile(tmpl, options.outputH));
         }
 
         tmplsStr += (i < l - 1 ? ',' : '') + '\n';
       }
     });
-    output += '{\n' + tmplsStr + '};';
+    output += `{\n${tmplsStr}};`;
   }
 
   return '\'use strict\';\n\n'
     + (resourceOptions.compiled ? 'var nj = require(\'nornj\');\n\n' : '')
-    + 'module.exports = ' + output;
+    + `module.exports = ${output}`;
 };
