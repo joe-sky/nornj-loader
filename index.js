@@ -1,7 +1,7 @@
 'use strict';
 
 const nj = require('nornj'),
-  includeParser = require('nornj/src/parser/includeParser'),
+  includeParser = require('nornj/tools/includeParser'),
   loaderUtils = require('loader-utils');
 
 function buildTmplFns(fns) {
