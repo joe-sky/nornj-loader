@@ -29,9 +29,10 @@ module.exports = function (source) {
     start: options.startRule,
     end: options.endRule,
     expr: options.exprRule,
-    external: options.externalRule,
     prop: options.propRule,
-    template: options.templateRule
+    template: options.templateRule,
+    tagSp: options.tagSpRule,
+    comment: options.commentRule
   });
 
   //Set configs for expressions and filters
