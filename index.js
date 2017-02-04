@@ -2,15 +2,19 @@
 
 const nj = require('nornj'),
   includeParser = require('nornj/tools/includeParser'),
+  njUtils = require('nornj/tools/utils'),
   loaderUtils = require('loader-utils');
 
-function buildTmplFns(fns) {
+function buildTmplFns(fns, tmplKey) {
   let ret = '{\n';
+    ret += '  _njTmplKey: ' + tmplKey + ',\n';
+
   nj.each(fns, (v, k, i, l) => {
     if (k.indexOf('_') != 0) {
       ret += '  ' + k + ': ' + v.toString() + (i < l - 1 ? ',' : '') + '\n';
     }
   });
+
   return ret + '}';
 }
 
@@ -65,14 +69,13 @@ module.exports = function (source) {
   //Precompiling template
   if (tmplNames.length == 1 && tmplNames[0] === 'main') {
     if (tmpls.main.trim().length > 0) {
-      if (resourceOptions.raw) {
-        output += `nj(${JSON.stringify(tmpls.main)});`;
-      }
-      else if (resourceOptions.compiled) {
-        output += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpls.main, options.outputH)) + ');';
+      const tmplKey = njUtils.uniqueKey(tmpls.main);
+
+      if (resourceOptions.compiled) {
+        output += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpls.main, options.outputH), tmplKey) + ');';
       }
       else {
-        output += buildTmplFns(nj.precompile(tmpls.main, options.outputH)) + ';';
+        output += buildTmplFns(nj.precompile(tmpls.main, options.outputH), tmplKey) + ';';
       }
     }
   }
@@ -80,16 +83,14 @@ module.exports = function (source) {
     var tmplsStr = '';
     nj.each(tmpls, (tmpl, name, i, l) => {
       if (tmpl.trim().length > 0) {
+        const tmplKey = njUtils.uniqueKey(tmpl);
         tmplsStr += '  ' + name + ': ';
 
-        if (resourceOptions.raw) {
-          tmplsStr += `nj(${JSON.stringify(tmpl)})`;
-        }
-        else if (resourceOptions.compiled) {
-          tmplsStr += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpl, options.outputH)) + ')';
+        if (resourceOptions.compiled) {
+          tmplsStr += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpl, options.outputH), tmplKey) + ')';
         }
         else {
-          tmplsStr += buildTmplFns(nj.precompile(tmpl, options.outputH));
+          tmplsStr += buildTmplFns(nj.precompile(tmpl, options.outputH), tmplKey);
         }
 
         tmplsStr += (i < l - 1 ? ',' : '') + '\n';
@@ -99,6 +100,6 @@ module.exports = function (source) {
   }
 
   return '\'use strict\';\n\n'
-    + ((resourceOptions.raw || resourceOptions.compiled) ? 'var nj = require(\'nornj\');\n\n' : '')
+    + (resourceOptions.compiled ? 'var nj = require(\'nornj\');\n\n' : '')
     + `module.exports = ${output}`;
 };
