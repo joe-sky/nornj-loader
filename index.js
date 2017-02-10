@@ -39,6 +39,11 @@ module.exports = function (source) {
     comment: options.commentRule
   });
 
+  //Default conversion to compiled template functions
+  if(options.compiled == null) {
+    options.compiled = true;
+  }
+
   //Set configs for expressions and filters
   if (options.exprConfig) {
     let exprConfig = {};
@@ -71,7 +76,7 @@ module.exports = function (source) {
     if (tmpls.main.trim().length > 0) {
       const tmplKey = njUtils.uniqueKey(tmpls.main);
 
-      if (resourceOptions.compiled) {
+      if (options.compiled || resourceOptions.compiled) {
         output += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpls.main, options.outputH), tmplKey) + ');';
       }
       else {
@@ -86,7 +91,7 @@ module.exports = function (source) {
         const tmplKey = njUtils.uniqueKey(tmpl);
         tmplsStr += '  ' + name + ': ';
 
-        if (resourceOptions.compiled) {
+        if (options.compiled || resourceOptions.compiled) {
           tmplsStr += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpl, options.outputH), tmplKey) + ')';
         }
         else {
@@ -100,6 +105,6 @@ module.exports = function (source) {
   }
 
   return '\'use strict\';\n\n'
-    + (resourceOptions.compiled ? 'var nj = require(\'nornj\');\n\n' : '')
+    + ((options.compiled || resourceOptions.compiled) ? 'var nj = require(\'nornj\');\n\n' : '')
     + `module.exports = ${output}`;
 };
