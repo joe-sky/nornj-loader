@@ -7,7 +7,7 @@ const nj = require('nornj').default,
 
 function buildTmplFns(fns, tmplKey) {
   let ret = '{\n';
-    ret += '  _njTmplKey: ' + tmplKey + ',\n';
+  ret += '  _njTmplKey: ' + tmplKey + ',\n';
 
   nj.each(fns, (v, k, i, l) => {
     if (k.indexOf('_') != 0) {
@@ -22,43 +22,48 @@ function getCompileFnName(outputH) {
   return outputH ? 'compileH' : 'compile';
 }
 
-module.exports = function (source) {
+module.exports = function(source) {
   const options = loaderUtils.parseQuery(this.query),
     resourceOptions = loaderUtils.parseQuery(this.resourceQuery);
 
   this.cacheable && this.cacheable();
 
-  //Set delimiter rule of templates
-  nj.setTmplRule({
-    start: options.startRule,
-    end: options.endRule,
-    expr: options.exprRule,
-    prop: options.propRule,
-    template: options.templateRule,
-    tagSp: options.tagSpRule,
-    comment: options.commentRule
-  });
+  //Create delimiter rule of templates
+  const { delimiters } = options;
+  let tmplRule = nj.tmplRule;
+  if (delimiters != null) {
+    if (delimiters.toLowerCase() === 'react') {
+      tmplRule = nj.createTmplRule({
+        start: '{',
+        end: '}',
+        comment: ''
+      });
+    }
+    else {
+      tmplRule = nj.createTmplRule(delimiters);
+    }
+  }
 
   let compiled = options.compiled,
     compiledR = resourceOptions.compiled;
-  if(compiled == null) {  //Default conversion to compiled template functions
+  if (compiled == null) { //Default conversion to compiled template functions
     compiled = true;
   }
-  if(compiledR === 'false') {
+  if (compiledR === 'false') {
     compiledR = false;
   }
   compiled = compiledR ? true : compiled;
 
   //Set configs for expressions and filters
-  if (options.exprConfig) {
-    let exprConfig = {};
-    nj.each(options.exprConfig, (v, k) => {
-      exprConfig[k] = {
+  if (options.extensionConfig) {
+    let extensionConfig = {};
+    nj.each(options.extensionConfig, (v, k) => {
+      extensionConfig[k] = {
         options: v
       };
     });
 
-    nj.registerExpr(exprConfig);
+    nj.registerExtension(extensionConfig);
   }
   if (options.filterConfig) {
     let filterConfig = {};
@@ -72,7 +77,7 @@ module.exports = function (source) {
   }
 
   //Parse the "include" and "template" block
-  let tmpls = includeParser(source, this.resourcePath, true),
+  let tmpls = includeParser(source, this.resourcePath, true, null, null, tmplRule),
     tmplNames = Object.keys(tmpls),
     output = '';
 
@@ -82,14 +87,12 @@ module.exports = function (source) {
       const tmplKey = njUtils.uniqueKey(tmpls.main);
 
       if (compiled) {
-        output += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpls.main, options.outputH), tmplKey) + ');';
-      }
-      else {
-        output += buildTmplFns(nj.precompile(tmpls.main, options.outputH), tmplKey) + ';';
+        output += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpls.main, options.outputH, tmplRule), tmplKey) + ');';
+      } else {
+        output += buildTmplFns(nj.precompile(tmpls.main, options.outputH, tmplRule), tmplKey) + ';';
       }
     }
-  }
-  else {  //Output multiple templates
+  } else { //Output multiple templates
     var tmplsStr = '';
     nj.each(tmpls, (tmpl, name, i, l) => {
       if (tmpl.trim().length > 0) {
@@ -97,10 +100,9 @@ module.exports = function (source) {
         tmplsStr += '  ' + name + ': ';
 
         if (compiled) {
-          tmplsStr += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpl, options.outputH), tmplKey) + ')';
-        }
-        else {
-          tmplsStr += buildTmplFns(nj.precompile(tmpl, options.outputH), tmplKey);
+          tmplsStr += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpl, options.outputH, tmplRule), tmplKey) + ')';
+        } else {
+          tmplsStr += buildTmplFns(nj.precompile(tmpl, options.outputH, tmplRule), tmplKey);
         }
 
         tmplsStr += (i < l - 1 ? ',' : '') + '\n';
@@ -109,7 +111,7 @@ module.exports = function (source) {
     output += `{\n${tmplsStr}};`;
   }
 
-  return '\'use strict\';\n\n'
-    + (compiled ? 'var nj = require(\'nornj\');\n\n' : '')
-    + `module.exports = ${output}`;
+  return '\'use strict\';\n\n' +
+    (compiled ? 'var nj = require(\'nornj\');\n\n' : '') +
+    `module.exports = ${output}`;
 };
