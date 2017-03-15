@@ -77,7 +77,7 @@ module.exports = function(source) {
   }
 
   //Parse the "include" and "template" block
-  let tmpls = includeParser(source, this.resourcePath, true, null, null, tmplRule),
+  let tmpls = includeParser(source, this.resourcePath, tmplRule, true),
     tmplNames = Object.keys(tmpls),
     output = '';
 
