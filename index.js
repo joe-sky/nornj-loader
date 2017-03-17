@@ -54,7 +54,7 @@ module.exports = function(source) {
   }
   compiled = compiledR ? true : compiled;
 
-  //Set configs for expressions and filters
+  //Set configs for extension tags and filters
   if (options.extensionConfig) {
     let extensionConfig = {};
     nj.each(options.extensionConfig, (v, k) => {
