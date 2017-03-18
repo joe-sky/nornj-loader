@@ -1,6 +1,6 @@
 {
   "name": "nornj-loader",
-  "version": "0.4.1-rc.8",
+  "version": "0.4.1-rc.10",
   "description": "Webpack loader for template engine NornJ",
   "main": "index.js",
   "files": [
@@ -20,7 +20,7 @@
   "author": "Joe_Sky <hitomi_doax@sina.com>",
   "license": "MIT",
   "dependencies": {
-    "loader-utils": "^0.2.16"
+    "loader-utils": "^1.1.0"
   },
   "peerDependencies": {
     "nornj": "^0.4.1-alpha || ^0.4.1-beta || ^0.4.1-rc || ^0.4.1"

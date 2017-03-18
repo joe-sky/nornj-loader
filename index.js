@@ -23,8 +23,8 @@ function getCompileFnName(outputH) {
 }
 
 module.exports = function(source) {
-  const options = loaderUtils.parseQuery(this.query),
-    resourceOptions = loaderUtils.parseQuery(this.resourceQuery);
+  const options = loaderUtils.getOptions(this) || {},
+    resourceOptions = this.resourceQuery ? loaderUtils.parseQuery(this.resourceQuery) : {};
 
   this.cacheable && this.cacheable();
 
