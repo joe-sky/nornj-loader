@@ -38,21 +38,21 @@ module.exports = function(source) {
         end: '}',
         comment: ''
       });
-    }
-    else {
+    } else {
       tmplRule = nj.createTmplRule(delimiters);
     }
   }
 
-  let compiled = options.compiled,
-    compiledR = resourceOptions.compiled;
-  if (compiled == null) { //Default conversion to compiled template functions
-    compiled = true;
+  //Default conversion to compiled template functions
+  let compiled = true,
+    raw = options.raw,
+    rawR = resourceOptions.raw;
+  if (raw) {
+    compiled = false;
   }
-  if (compiledR === 'false') {
-    compiledR = false;
+  if (rawR) {
+    compiled = rawR === 'false';
   }
-  compiled = compiledR ? true : compiled;
 
   //Set configs for extension tags and filters
   if (options.extensionConfig) {
