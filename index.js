@@ -32,7 +32,7 @@ module.exports = function(source) {
   const { delimiters } = options;
   let tmplRule = nj.tmplRule;
   if (delimiters != null) {
-    if (delimiters.toLowerCase() === 'react') {
+    if (nj.isString(delimiters) && delimiters.toLowerCase() === 'react') {
       tmplRule = nj.createTmplRule({
         start: '{',
         end: '}',
