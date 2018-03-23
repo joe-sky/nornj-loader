@@ -56,23 +56,35 @@ module.exports = function(source) {
 
   //Set configs for extension tags and filters
   if (options.extensionConfig) {
-    let extensionConfig = {};
-    nj.each(options.extensionConfig, (v, k) => {
-      extensionConfig[k] = {
-        options: v
-      };
-    });
+    let extensionConfig = {},
+      extensionConfigs = options.extensionConfig;
+    if (!Array.isArray(extensionConfigs)) {
+      extensionConfigs = [extensionConfigs];
+    }
 
+    nj.each(extensionConfigs, exConfig => {
+      nj.each(exConfig, (v, k) => {
+        extensionConfig[k] = {
+          options: v
+        };
+      });
+    });
     nj.registerExtension(extensionConfig);
   }
   if (options.filterConfig) {
-    let filterConfig = {};
-    nj.each(options.filterConfig, (v, k) => {
-      filterConfig[k] = {
-        options: v
-      };
-    });
+    let filterConfig = {},
+      filterConfigs = options.filterConfig;
+    if (!Array.isArray(filterConfigs)) {
+      filterConfigs = [filterConfigs];
+    }
 
+    nj.each(filterConfigs, fConfig => {
+      nj.each(fConfig, (v, k) => {
+        filterConfig[k] = {
+          options: v
+        };
+      });
+    });
     nj.registerFilter(filterConfig);
   }
 
