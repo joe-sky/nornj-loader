@@ -1,8 +1,15 @@
 ﻿# NornJ-loader
+
 Webpack loader for template engine NornJ
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][npm-url]
+
+## 概述
+
+`nornj-loader`用于在`Webpack`环境下，将`NornJ`的`单文件模板`编译为模板函数，与传统js模板引擎的`webpack-loader`(如[handlebars-loader](https://github.com/pcardune/handlebars-loader))作用是类似的。模板示例：
+
+![nornj-template-example](images/screenshot.png)
 
 ### 安装
 
