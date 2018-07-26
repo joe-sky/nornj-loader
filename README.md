@@ -1,4 +1,4 @@
-﻿# NornJ-loader
+# NornJ-loader
 
 Webpack loader for template engine NornJ
 
