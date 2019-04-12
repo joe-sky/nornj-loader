@@ -1,6 +1,6 @@
 'use strict';
 
-const nj = require('nornj').default,
+const nj = require('nornj/dist/nornj.common').default,
   includeParser = require('nornj/tools/includeParser'),
   njUtils = require('nornj/tools/utils'),
   loaderUtils = require('loader-utils');
