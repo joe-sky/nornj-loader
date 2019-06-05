@@ -1,46 +1,51 @@
-'use strict';
+"use strict";
 
-const nj = require('nornj/dist/nornj.common').default,
-  includeParser = require('nornj/tools/includeParser'),
-  njUtils = require('nornj/tools/utils'),
-  loaderUtils = require('loader-utils');
+const nj = require("nornj/dist/nornj.common").default,
+  includeParser = require("nornj/tools/includeParser"),
+  njUtils = require("nornj/tools/utils"),
+  loaderUtils = require("loader-utils");
 
 function buildTmplFns(fns, tmplKey) {
-  let ret = '{\n';
-  ret += '  _njTmplKey: ' + tmplKey + ',\n';
+  let ret = "{\n";
+  ret += "  _njTmplKey: " + tmplKey + ",\n";
 
   nj.each(fns, (v, k, i, l) => {
-    if (k.indexOf('_') != 0) {
-      ret += '  ' + k + ': ' + v.toString() + (i < l - 1 ? ',' : '') + '\n';
+    if (k.indexOf("_") != 0) {
+      ret += "  " + k + ": " + v.toString() + (i < l - 1 ? "," : "") + "\n";
     }
   });
 
-  return ret + '}';
+  return ret + "}";
 }
 
 function getCompileFnName(outputH) {
-  return outputH ? 'compileH' : 'compile';
+  return outputH ? "compileH" : "compile";
 }
 
 module.exports = function(source) {
   const options = loaderUtils.getOptions(this) || {},
-    resourceOptions = this.resourceQuery ? loaderUtils.parseQuery(this.resourceQuery) : {};
+    resourceOptions = this.resourceQuery
+      ? loaderUtils.parseQuery(this.resourceQuery)
+      : {};
 
   this.cacheable && this.cacheable();
 
   //Create delimiter rule of templates
-  const { delimiters } = options;
+  const { delimiters, fixTagName } = options;
   let tmplRule = nj.tmplRule;
   if (delimiters != null) {
-    if (nj.isString(delimiters) && delimiters.toLowerCase() === 'react') {
+    if (nj.isString(delimiters) && delimiters.toLowerCase() === "react") {
       tmplRule = nj.createTmplRule({
-        start: '{',
-        end: '}',
-        comment: ''
+        start: "{",
+        end: "}",
+        comment: ""
       });
     } else {
       tmplRule = nj.createTmplRule(delimiters);
     }
+  }
+  if (fixTagName != null) {
+    nj.config({ fixTagName });
   }
 
   //Default conversion to compiled template functions
@@ -51,7 +56,7 @@ module.exports = function(source) {
     compiled = false;
   }
   if (rawR) {
-    compiled = rawR === 'false';
+    compiled = rawR === "false";
   }
 
   //Set configs for extension tags and filters
@@ -91,39 +96,65 @@ module.exports = function(source) {
   //Parse the "include" and "template" block
   let tmpls = includeParser(source, this.resourcePath, tmplRule, true),
     tmplNames = Object.keys(tmpls),
-    output = '';
+    output = "";
 
   //Precompiling template
-  if (tmplNames.length == 1 && tmplNames[0] === 'main') {
+  if (tmplNames.length == 1 && tmplNames[0] === "main") {
     if (tmpls.main.trim().length > 0) {
       const tmplKey = njUtils.uniqueKey(tmpls.main);
 
       if (compiled) {
-        output += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpls.main, options.outputH, tmplRule), tmplKey) + ');';
+        output +=
+          "nj." +
+          getCompileFnName(options.outputH) +
+          "(" +
+          buildTmplFns(
+            nj.precompile(tmpls.main, options.outputH, tmplRule),
+            tmplKey
+          ) +
+          ");";
       } else {
-        output += buildTmplFns(nj.precompile(tmpls.main, options.outputH, tmplRule), tmplKey) + ';';
+        output +=
+          buildTmplFns(
+            nj.precompile(tmpls.main, options.outputH, tmplRule),
+            tmplKey
+          ) + ";";
       }
     }
-  } else { //Output multiple templates
-    var tmplsStr = '';
+  } else {
+    //Output multiple templates
+    var tmplsStr = "";
     nj.each(tmpls, (tmpl, name, i, l) => {
       if (tmpl.trim().length > 0) {
         const tmplKey = njUtils.uniqueKey(tmpl);
-        tmplsStr += '  ' + name + ': ';
+        tmplsStr += "  " + name + ": ";
 
         if (compiled) {
-          tmplsStr += 'nj.' + getCompileFnName(options.outputH) + '(' + buildTmplFns(nj.precompile(tmpl, options.outputH, tmplRule), tmplKey) + ')';
+          tmplsStr +=
+            "nj." +
+            getCompileFnName(options.outputH) +
+            "(" +
+            buildTmplFns(
+              nj.precompile(tmpl, options.outputH, tmplRule),
+              tmplKey
+            ) +
+            ")";
         } else {
-          tmplsStr += buildTmplFns(nj.precompile(tmpl, options.outputH, tmplRule), tmplKey);
+          tmplsStr += buildTmplFns(
+            nj.precompile(tmpl, options.outputH, tmplRule),
+            tmplKey
+          );
         }
 
-        tmplsStr += (i < l - 1 ? ',' : '') + '\n';
+        tmplsStr += (i < l - 1 ? "," : "") + "\n";
       }
     });
     output += `{\n${tmplsStr}};`;
   }
 
-  return '\'use strict\';\n\n' +
-    (compiled ? 'var nj = require(\'nornj\');\n\n' : '') +
-    `module.exports = ${output}`;
+  return (
+    "'use strict';\n\n" +
+    (compiled ? "var nj = require('nornj');\n\n" : "") +
+    `module.exports = ${output}`
+  );
 };
